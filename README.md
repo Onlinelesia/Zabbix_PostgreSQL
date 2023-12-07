@@ -25,11 +25,37 @@ sudo apt update
 
 Установить Zabbix сервер, веб-интерфейс и агент
 ```
-sudo apt install zabbix-server-pgsql zabbix-frontend-php php-pgsql zabbix-nginx-conf zabbix-agent
+sudo apt install zabbix-server-pgsql zabbix-frontend-php php8.1-pgsql zabbix-apache-conf zabbix-sql-scripts zabbix-agent
 ```
 
 Установка PostgreSQL
-При установке перенести всё на отдельный диск в /opt.
+```
+sudo apt install postgresql postgresql-contrib net-snmp fping nmap
+```
+Создать и настроить БД Postgres для Zabbix
+```
+sudo -u postgres psql
+CREATE DATABASE zabbix;
+CREATE USER zabbixuser WITH PASSWORD 'password'; 
+GRANT ALL PRIVILEGES ON DATABASE zabbix TO zabbixuser;
+```
+На хосте Zabbix сервера импортировать начальную схему и данные
+```
+zcat /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | sudo -u zabbix psql zabbix
+```
+Настроить базу данных для Zabbix сервера
+Отредактировать файл /etc/zabbix/zabbix_server.conf
+Раскомментировать и добавить пароль
+DBPassword=password
+
+Запустить процессы Zabbix сервера и агента
+```
+sudo systemctl restart zabbix-server zabbix-agent apache2
+sudo systemctl enable zabbix-server zabbix-agent apache2
+```
+
+В браузере открыть http://IP VM3/zabbix
+
 
 
 
